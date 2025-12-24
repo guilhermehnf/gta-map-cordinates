@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Calibrar (0,0) GTA V</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+      color: #fff;
+      font-family: Arial;
+    }
+    .info {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="info">
+    <strong>Arraste o ponto vermelho</strong> para alinhar o (0,0)<br>
+    <strong>Scroll</strong> = Zoom<br><br>
+    Offset X: <span id="ox"></span><br>
+    Offset Y: <span id="oy"></span>
+  </div>
+
+  <canvas id="map"></canvas>
+  <script src="script.js"></script>
+</body>
+</html>
