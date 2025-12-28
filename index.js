@@ -6,10 +6,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const MAP_SIZE = 8192;
-const OUTPUT_SIZE = 1024;
 
 const OFFSET_X = 3760;
 const OFFSET_Y = 5531;
+
 const SCALE_X = 0.659;
 const SCALE_Y = 0.678;
 
@@ -47,7 +47,6 @@ function drawGpsMarker(ctx, x, y, size = 14) {
 app.get("/map", async (req, res) => {
   const gx = Number(req.query.x);
   const gy = Number(req.query.y);
-  let zoom = Number(req.query.zoom);
 
   if (isNaN(gx) || isNaN(gy)) {
     return res.status(400).json({
@@ -55,14 +54,12 @@ app.get("/map", async (req, res) => {
     });
   }
 
-  if (isNaN(zoom) || zoom < 1) zoom = 1;
-  if (zoom > 100) zoom = 100;
-
   let { px, py } = gtaToPixel(gx, gy);
 
   px = Math.max(0, Math.min(MAP_SIZE - 1, px));
   py = Math.max(0, Math.min(MAP_SIZE - 1, py));
 
+  const OUTPUT_SIZE = 1024;
   const canvas = createCanvas(OUTPUT_SIZE, OUTPUT_SIZE);
   const ctx = canvas.getContext("2d");
 
@@ -71,34 +68,22 @@ app.get("/map", async (req, res) => {
       path.join(__dirname, "gta-map.jpeg")
     );
 
-    const scaleFactor = 1 / zoom;
-    const sourceWidth = MAP_SIZE * scaleFactor;
-    const sourceHeight = MAP_SIZE * scaleFactor;
-
-    const sourceX = px - sourceWidth / 2;
-    const sourceY = py - sourceHeight / 2;
-
-    const clampedX = Math.max(0, Math.min(MAP_SIZE - sourceWidth, sourceX));
-    const clampedY = Math.max(0, Math.min(MAP_SIZE - sourceHeight, sourceY));
-
     ctx.drawImage(
       mapImage,
-      clampedX,          // sx
-      clampedY,          // sy
-      sourceWidth,       // sWidth
-      sourceHeight,      // sHeight
-      0,                 // dx
-      0,                 // dy
-      OUTPUT_SIZE,       // dWidth
-      OUTPUT_SIZE        // dHeight
+      0,
+      0,
+      MAP_SIZE,
+      MAP_SIZE,
+      0,
+      0,
+      OUTPUT_SIZE,
+      OUTPUT_SIZE
     );
 
-    const markerX = OUTPUT_SIZE / 2;
-    const markerY = OUTPUT_SIZE / 2;
+    const markerX = (px / MAP_SIZE) * OUTPUT_SIZE;
+    const markerY = (py / MAP_SIZE) * OUTPUT_SIZE;
 
-    const markerSize = 14 + (zoom - 1) * 0.4; 
-
-    drawGpsMarker(ctx, markerX, markerY, markerSize);
+    drawGpsMarker(ctx, markerX, markerY, 14);
 
     res.setHeader("Content-Type", "image/png");
     res.setHeader("Cache-Control", "no-cache");
@@ -110,6 +95,5 @@ app.get("/map", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-  console.log(`Exemplo: http://localhost:${PORT}/map?x=100&y=-200&zoom=10`);
+  console.log(`🚀 http://localhost:${PORT}`);
 });
